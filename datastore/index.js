@@ -62,23 +62,56 @@ exports.readAll = (callback) => {
 };
 
 exports.readOne = (id, callback) => {
-  var result = [];
-  var text = items[id];
-  if (!text) {
-    callback(new Error(`No item with id: ${id}`));
-  } else {
-    callback(null, { id, text });
-  }
+  fs.readFile(path.join(exports.dataDir, `${id}.txt`), (err, fileData) => {
+    if (err) {
+      callback(new Error(`Cannot find ${id}.txt`));
+    } else {
+      callback(null, { id: id, text: fileData.toString() });
+    }
+  });
+
+
+  // var result = [];
+  // var text = items[id];
+  // if (!text) {
+  //   callback(new Error(`No item with id: ${id}`));
+  // } else {
+  //   callback(null, { id, text });
+  // }
 };
 
 exports.update = (id, text, callback) => {
-  var item = items[id];
-  if (!item) {
-    callback(new Error(`No item with id: ${id}`));
-  } else {
-    items[id] = text;
-    callback(null, { id, text });
-  }
+  // if (!(path.join(exports.dataDir, `${id}.txt`))) {
+  //   return `Unable to find ${id}.txt`
+  // }
+  var fileIsIn;
+
+  fs.exists(path.join(exports.dataDir, `${id}.txt`), (exists) => {
+    // if (err) {
+    //   callback(new Error('is not finding file'));
+    // } else {
+      if (exists) {
+        fs.writeFile(path.join(exports.dataDir, `${id}.txt`), text, (err) => {
+          // if (err) {
+          //   callback(new Error(`Unable to find ${id}.txt`));
+          // } else {
+            //console.log('here', { id: id, text: text })
+            callback(null, { id: id, text: text });
+          //}
+        });
+      } else {
+        callback(new Error(`Unable to find ${id}.txt`));
+      }
+    //}
+  })
+
+  // var item = items[id];
+  // if (!item) {
+  //   callback(new Error(`No item with id: ${id}`));
+  // } else {
+  //   items[id] = text;
+  //   callback(null, { id, text });
+  // }
 };
 
 exports.delete = (id, callback) => {
