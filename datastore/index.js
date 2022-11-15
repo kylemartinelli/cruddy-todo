@@ -13,7 +13,6 @@ exports.create = (text, callback) => {
   counter.getNextUniqueId((err, data) => {
     //path.join(exports.dataDir, ${data}.txt)
     //path.join('/', path.dirname(counter.counterFile), 'dataDir', path.basename(counter.counterFile)
-
     fs.writeFile(path.join(exports.dataDir, `${data}.txt`), text, (err) => {
       console.log(exports.dataDir)
       if (err) {
@@ -27,12 +26,24 @@ exports.create = (text, callback) => {
   // items[id] = text;
   // callback(null, { id, text });
 };
-console.log(exports.dataDir)
+
 exports.readAll = (callback) => {
-  var data = _.map(items, (text, id) => {
-    return { id, text };
-  });
-  callback(null, data);
+  // readDir - gets all file name
+    // iterate through file names(readDir callback)
+      //map read files
+        // return mapped array
+
+  fs.readdir(exports.dataDir, (err, files) => {
+    var theArray = _.map(files, (item) => {
+      fs.readFile((path.join(exports.dataDir + '/' + item)), (err, data) => {
+
+      })
+    });
+  })
+  // var data = _.map(items, (text, id) => {
+  //   return { id, text };
+  // });
+  // callback(null, data);
 };
 
 exports.readOne = (id, callback) => {
