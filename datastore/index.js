@@ -9,16 +9,17 @@ var items = {};
 
 
 
+
 exports.create = (text, callback) => {
   counter.getNextUniqueId((err, data) => {
     //path.join(exports.dataDir, ${data}.txt)
     //path.join('/', path.dirname(counter.counterFile), 'dataDir', path.basename(counter.counterFile)
     fs.writeFile(path.join(exports.dataDir, `${data}.txt`), text, (err) => {
-      console.log(exports.dataDir)
+      //console.log(exports.dataDir)
       if (err) {
         callback(new Error(`Unable to write counter`));
       } else {
-        callback(null, {id: data, text: text});
+        callback(null, { id: data, text: text });
       }
     });
   });
@@ -29,24 +30,39 @@ exports.create = (text, callback) => {
 
 exports.readAll = (callback) => {
   // readDir - gets all file name
-    // iterate through file names(readDir callback)
-      //map read files
-        // return mapped array
-
+  // iterate through file names(readDir callback)
+  //map read files
+  // return mapped array
+  var returnArr = [];
   fs.readdir(exports.dataDir, (err, files) => {
-    var theArray = _.map(files, (item) => {
-      fs.readFile((path.join(exports.dataDir + '/' + item)), (err, data) => {
-
-      })
-    });
+    if (err) {
+      callback(new Error('Cannot read directory'));
+    } else {
+      _.each(files, (item) => {
+        // fs.readFile((path.join(exports.dataDir + '/' + item)), (err, data) => {
+        //   if (err) {
+        //     callback (new Error ('Cannot read file in directory'));
+        //   } else {
+        //     console.log('readall', { id: item.slice(0, 5), text: data.toString() })
+        //     returnArr.push({ id: item.slice(0, 5), text: data.toString() })
+        //   }
+        // })
+        returnArr.push({ id: item.slice(0, 5), text: item.slice(0, 5) });
+        // console.log('readall', { id: item.slice(0, 5), text: data.toString() })
+        // returnArr.push({ id: item.slice(0, 5), text: data.toString() });
+      });
+      callback(null, returnArr);
+    }
   })
+
   // var data = _.map(items, (text, id) => {
-  //   return { id, text };
+  //   return { id, text };n
   // });
   // callback(null, data);
 };
 
 exports.readOne = (id, callback) => {
+  var result = [];
   var text = items[id];
   if (!text) {
     callback(new Error(`No item with id: ${id}`));
