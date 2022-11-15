@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const sprintf = require('sprintf-js').sprintf;
 
-var counter = 0;
+//var counter = 0;
 
 // Private helper functions ////////////////////////////////////////////////////
 
@@ -37,11 +37,17 @@ const writeCounter = (count, callback) => {
 };
 
 // Public API - Fix this function //////////////////////////////////////////////
-
-exports.getNextUniqueId = () => {
-  counter = counter + 1;
-  return zeroPaddedNumber(counter);
+//
+// use error first callback pattern
+// readCounter(err, fileData)
+  // writeCounter(counter + 1, callback)
+exports.getNextUniqueId = (callback) => {
+  // counter = counter + 1;
+  // return zeroPaddedNumber(counter);
+  readCounter((err, count) => {writeCounter(++count, callback)});
 };
+// first make a directory using the initialzation function
+
 
 
 
