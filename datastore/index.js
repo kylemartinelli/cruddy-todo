@@ -3,6 +3,9 @@ const path = require('path');
 const _ = require('underscore');
 const counter = require('./counter');
 
+const Promise = require('bluebird');
+const readFilePromise = Promise.promisify(fs.readFile)
+
 var items = {};
 
 // Public API - Fix these CRUD functions ///////////////////////////////////////
@@ -29,37 +32,67 @@ exports.create = (text, callback) => {
 };
 
 exports.readAll = (callback) => {
-  // readDir - gets all file name
-  // iterate through file names(readDir callback)
-  //map read files
-  // return mapped array
-  var returnArr = [];
+
   fs.readdir(exports.dataDir, (err, files) => {
     if (err) {
-      callback(new Error('Cannot read directory'));
-    } else {
-      _.each(files, (item) => {
-        // fs.readFile((path.join(exports.dataDir + '/' + item)), (err, data) => {
-        //   if (err) {
-        //     callback (new Error ('Cannot read file in directory'));
-        //   } else {
-        //     console.log('readall', { id: item.slice(0, 5), text: data.toString() })
-        //     returnArr.push({ id: item.slice(0, 5), text: data.toString() })
-        //   }
-        // })
-        returnArr.push({ id: item.slice(0, 5), text: item.slice(0, 5) });
-        // console.log('readall', { id: item.slice(0, 5), text: data.toString() })
-        // returnArr.push({ id: item.slice(0, 5), text: data.toString() });
-      });
-      callback(null, returnArr);
+      throw ('error reading data folder');
     }
-  })
+    var data = _.map(files, (file) => {
+      var id = path.basename(file, '.txt');
+      var filepath = path.join(exports.dataDir, file);
+      return readFilePromise(filepath).then(fileData => {
+        return {
+          id: id,
+          text: fileData.toString()
+        };
+      });
+    });
+    Promise.all(data)
+      .then(items => callback(null, items), err => callback(err));
+  });
+  };
 
-  // var data = _.map(items, (text, id) => {
-  //   return { id, text };n
-  // });
-  // callback(null, data);
-};
+// exports.readAll = (callback) => {
+//   // readDir - gets all file name
+//   // iterate through file names(readDir callback)
+//   //map read files
+//   // return mapped array
+
+//   fs.readdir(exports.dataDir, (err, files) => {
+//     if (err) {
+//       console.log('1')
+//       callback (new Error('Cannot read directory'));
+//     }
+
+//     var data = _.map(files, (file) => {
+//       var id = path.basename(file, '.txt');
+//       var filepath = path.join(exports.dataDir, file);
+//       return readFilePromise(filepath).then(fileData => {
+//         return {
+//           id: id,
+//           text: fileData.toString()
+//         };
+//       });
+//     });
+
+//     // var data = _.map(files, (item) => {
+//     //   // var id = path.basename(item, '.txt')
+//     //   console.log('2')
+//     //   return readFilePromise(item).then((fileData) => {
+//     //     console.log('3')
+//     //     return {
+//     //       id: item.slice(0, 5),
+//     //       text: fileData.toString()
+//     //     }
+//     //   })
+//     // })
+
+//     Promise.all(data)
+//     .then(items => callback(null, items), err => callback(err));
+
+//   })
+// }
+
 
 exports.readOne = (id, callback) => {
   fs.readFile(path.join(exports.dataDir, `${id}.txt`), (err, fileData) => {
@@ -103,7 +136,7 @@ exports.update = (id, text, callback) => {
 exports.delete = (id, callback) => {
   fs.unlink(path.join(exports.dataDir, `${id}.txt`), (err) => {
     if (err) {
-      callback(new Error( `Unable to find ${id}.txt to delete`));
+      callback(new Error(`Unable to find ${id}.txt to delete`));
     } else {
       callback()
     }
